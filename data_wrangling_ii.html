@@ -372,6 +372,95 @@ table_cost =
   cost_html |&gt;
   html_table(header = TRUE) |&gt;
   first()</code></pre>
+<div id="css-selector" class="section level2">
+<h2>css selector</h2>
+<p>how to define the title (how to extract the exact type of data)</p>
+<pre class="r"><code>swm_html = 
+  read_html(&quot;https://www.imdb.com/list/ls070150896/&quot;)
+
+title_vec = 
+  swm_html |&gt;
+  html_elements(&quot;.ipc-title-link-wrapper .ipc-title__text&quot;) |&gt;
+  html_text()
+
+metascore_vec = 
+  swm_html |&gt;
+  html_elements(&quot;.metacritic-score-box&quot;) |&gt;
+  html_text()
+
+runtime_vec = 
+  swm_html |&gt;
+  html_elements(&quot;.dli-title-metadata-item:nth-child(2)&quot;) |&gt;
+  html_text()
+
+swm_df = 
+  tibble(
+    title = title_vec,
+    score = metascore_vec,
+    runtime = runtime_vec)</code></pre>
+<p>Let’s import some books</p>
+<pre class="r"><code>url = &quot;http://books.toscrape.com&quot;
+
+books_html = read_html(url)
+
+books_titles = 
+  books_html |&gt;
+  html_elements(&quot;h3&quot;) |&gt;
+  html_text2()
+
+books_stars = 
+  books_html |&gt;
+  html_elements(&quot;.star-rating&quot;) |&gt;
+  html_attr(&quot;class&quot;)
+
+books_price = 
+  books_html |&gt;
+  html_elements(&quot;.price_color&quot;) |&gt;
+  html_text()
+
+books = tibble(
+  title = books_titles,
+  stars = books_stars,
+  price = books_price
+)</code></pre>
+</div>
+<div id="use-api" class="section level2">
+<h2>Use API</h2>
+<pre class="r"><code>nyc_water = 
+  GET(&quot;https://data.cityofnewyork.us/resource/ia2d-e54m.csv&quot;) |&gt; 
+  content()</code></pre>
+<pre><code>## Rows: 45 Columns: 4
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## dbl (4): year, new_york_city_population, nyc_consumption_million_gallons_per...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code># set a limit the number of rows (instructions given by the website) 
+brfss_df = 
+  GET(&quot;https://chronicdata.cdc.gov/resource/acme-vg9e.csv&quot;,
+      query = list(&quot;$limit&quot; = 5000)) |&gt; 
+  content()</code></pre>
+<pre><code>## Rows: 5000 Columns: 23
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (16): locationabbr, locationdesc, class, topic, question, response, data...
+## dbl  (6): year, sample_size, data_value, confidence_limit_low, confidence_li...
+## lgl  (1): locationid
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>poke = 
+  GET(&quot;http://pokeapi.co/api/v2/pokemon/1&quot;) |&gt;
+  content()
+
+poke[[&quot;name&quot;]]</code></pre>
+<pre><code>## [1] &quot;bulbasaur&quot;</code></pre>
+<pre class="r"><code>poke$height</code></pre>
+<pre><code>## [1] 7</code></pre>
+<pre class="r"><code>poke$abiities</code></pre>
+<pre><code>## NULL</code></pre>
+</div>
 
 
 
