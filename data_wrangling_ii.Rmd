@@ -1,0 +1,41 @@
+---
+title: "data_wrangling_ii"
+author: "Yunjia Liu"
+date: "2024-10-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(rvest)
+library(httr)
+library(tidyverse)
+```
+
+
+```{r }
+url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+drug_use_html = read_html(url)
+
+
+```
+
+Get the pieces that you really need.
+```{r}
+table_marj = 
+  drug_use_html |> 
+  html_table() |> 
+  first() |>
+  slice(-1)  #cleaning the NOTE row (on the top of the whole table)
+```
+
+Read in cost of living
+```{r ex.1}
+cost_html = read_html("https://www.bestplaces.net/cost_of_living/city/new_york/new_york")
+table_cost = 
+  cost_html |>
+  html_table(header = TRUE) |>
+  first()
+  
+```
+
