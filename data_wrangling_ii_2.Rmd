@@ -1,0 +1,160 @@
+---
+title: "data_wrangling_ii"
+author: "Yunjia Liu"
+date: "2024-10-15"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(rvest)
+library(stringr)
+library(httr)
+library(tidyverse)
+library(p8105.datasets)
+```
+
+```{r}
+string_vec = c("my","name","is","Veronica")
+
+str_detect(string_vec, "s")
+str_detect(string_vec, "veronica")
+```
+
+
+```{r}
+string_vec = c(
+  "i think we all rule for participating",
+  "i think i have been caught",
+  "i think this will be quite fun actually",
+  "it will be fun, i think"
+  )
+
+str_detect(string_vec, "i think")
+str_detect(string_vec, "^i think") #looking for the beginning of the line
+str_detect(string_vec, "i think$") #looking for the end of the line
+```
+
+
+```{r}
+string_vec = c(
+  "Time for a Pumpkin Spice Latte!",
+  "went to the #pumpkinpatch last weekend",
+  "Pumpkin Pie is obviously the best pie",
+  "SMASHING PUMPKINS -- LIVE IN CONCERT!!"
+  )
+
+str_detect(string_vec,"[Pp]umpkin") #found the string with regardless to uppercase / lowercase
+```
+
+
+
+```{r}
+string_vec = c(
+  '7th inning stretch',
+  '1st half soon to begin. Texas won the toss.',
+  'she is 5 feet 4 inches tall',
+  '3AM - cant sleep :('
+  )
+
+str_detect(string_vec, "^[0-9][a-zA-Z]") #detect number+aplahbetic combination with no space in between
+```
+
+
+```{r}
+string_vec = c(
+  'Its 7:11 in the evening',
+  'want to go to 7-11?',
+  'my flight is AA711',
+  'NetBios: scanning ip 203.167.114.66'
+  )
+
+str_detect(string_vec, "7.11") #The character . matches anything.
+```
+
+
+```{r}
+string_vec = c(
+  'The CI is [2, 5]',
+  ':-]',
+  ':-[',
+  'I found the answer on pages [6-7]'
+  )
+
+str_detect(string_vec, "\\[") #detect the special character put \\ before, put \\\\ to detect \\ itself
+```
+
+
+
+### factor and vector
+```{r}
+vec_sex = factor(c("male", "male", "female", "female"))
+vec_sex
+as.numeric(vec_sex)
+```
+
+
+
+```{r}
+nsduh_url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+data_marj = 
+  read_html(nsduh_url) |> 
+  html_table() |> 
+  first() |>
+  slice(-1) |>
+  select(-contains("P Value")) |>
+  pivot_longer(
+    -State,
+    names_to = "age_year", 
+    values_to = "percent") |>
+  separate(age_year, into = c("age", "year"), sep = "\\(") |>
+  mutate(
+    year = str_replace(year, "\\)", ""),
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent))
+```
+
+
+```{r}
+data_marj |>
+  filter(
+    age == "12-17",
+    !(State %in% c("Total U.S.","South"))) |> 
+  mutate(
+    State = fct_reorder(State, percent)
+    ) |> 
+  ggplot(aes(x = State, y = percent, color = year)) + 
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
+```{r}
+data("rest_inspec")
+
+rest_inspec |> 
+  group_by(boro, grade) |> 
+  summarize(n = n()) |> 
+  pivot_wider(names_from = grade, values_from = n)
+
+rest_inspec =
+  rest_inspec |>
+  filter(grade %in% c("A", "B", "C"), boro != "Missing") |> 
+  mutate(boro = str_to_title(boro))
+
+
+rest_inspec |> 
+  filter(str_detect(dba, "Pizza")) |> 
+  group_by(boro, grade) |> 
+  summarize(n = n()) |> 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+
+```{r}
+
+devtools::install_github("benmarwick/wordcountaddin",  type = "source", dependencies = TRUE)
+wordcountaddin::text_stats("data_wrangling_ii_2.Rmd")
+```
+

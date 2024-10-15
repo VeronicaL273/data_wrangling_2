@@ -2,7 +2,7 @@
 title: "data_wrangling_ii"
 author: "Yunjia Liu"
 date: "2024-10-10"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
